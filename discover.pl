@@ -31,6 +31,7 @@ sub scrape_created {
 		push (@projects, $name);
 	}
 
+	my $count   = 0;
 	for my $project (@projects) {
 		my $leader  = substr($project,0,1);
 		my $dir     = PROJECT_DIR . "$leader/" . ($project =~ m#^(.*)/#)[0];
@@ -46,10 +47,10 @@ sub scrape_created {
 			open (my $fh, '>', "$dir/$name");
 			close ($fh);
 		}
+		$count++;
 		say "Created project with location $dir/$name";
 	}
-
-	return scalar @projects;
+	return $count ? $count : undef;
 }
 
 my $page   = 1;
