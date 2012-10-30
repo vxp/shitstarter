@@ -40,7 +40,8 @@ sub scrape_created {
 		mkdir ($dir) unless (-d $dir);
 
 		if (-f "$dir/$name") {
-			say "What the heck, the project existed? $project";
+			# Already indexed this project
+			next;
 		} else {
 			open (my $fh, '>', "$dir/$name");
 			close ($fh);
