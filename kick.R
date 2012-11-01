@@ -34,4 +34,4 @@ readline("hit enter to see next graph: plotting LOG normed funds")
 kick$lf <- log(kick$f + 0.01) # 0.01 is arbitrary, could be anything positive
 plot(kick$t, kick$lf, cex=0.5)
 fitlf <- loess(lf ~ t, kick)
-drawloess(fit2, F)
+drawloess(fitlf, F)
