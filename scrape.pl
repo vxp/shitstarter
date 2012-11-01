@@ -58,8 +58,7 @@ sub scrape_project {
 
 	# Write the current progress
 	my @first   = split(/\t/, $firstline);
-	say "First: $first[3]";
-	say "Second: $first[4]";
+	say "First: $first[3]. Second: $first[4]";
 	my $start   = Time::Piece->strptime($first[3], TIME_FORMAT);
 	my $end     = Time::Piece->strptime($first[4], TIME_FORMAT);
 	my $length  = $end - $start;
@@ -73,8 +72,7 @@ sub scrape_project {
 	my $amount  = $stats->look_down(id  => 'pledged')
 					->look_down(_tag => 'span')->attr('data-value');
 
-	say "There are $backers backers";
-	say "They have funded the project: $amount of $first[5] $first[6]";
+	say "There are $backers backers, who have given $amount of $first[5] $first[6]";
 	say "Project began at $start and ends at $end, relative progression $reltime";
 
 	print $fh $now->strftime(TIME_FORMAT) . "\t$reltime\t$backers\t$amount\n";
