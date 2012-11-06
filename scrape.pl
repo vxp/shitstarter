@@ -67,8 +67,9 @@ sub scrape_project {
 	my $reltime = $prog->seconds/$length->seconds;
 	
 	my $stats   = $tree->look_down(id   => 'stats');
+	next unless ($stats);
 	my $backers = $stats->look_down(id  => 'backers_count')
-					->attr('data-backers-count');
+						->attr('data-backers-count');
 	my $amount  = $stats->look_down(id  => 'pledged')
 					->look_down(_tag => 'span')->attr('data-value');
 
