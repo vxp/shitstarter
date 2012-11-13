@@ -98,9 +98,11 @@ old3 <- function() {
 # 3. extrapolate prediction from fit
 # 4. slap the fit on top of plot with error area
 # 5. add final prediction to file
-makeniceplots <- function(project, predfile="pred.txt", pngdir="pngs") {
+makeniceplots <- function(predfile="pred.txt", pngdir="pngs") {
 
-	cat("making nice plots, gonna put them in the directory", pngdir, "\n")
+	if (pngdir != "") {
+		cat("making nice plots, gonna put them in the directory", pngdir, "\n")
+	}
 
 	for (id in ids) {
 
@@ -133,13 +135,18 @@ makeniceplots <- function(project, predfile="pred.txt", pngdir="pngs") {
 		}
 
 		# open png file
-		png(paste(pngdir, "/", id, ".png", sep=""), 800, 600)
+		if (pngdir != "") {
+			path <- paste(pngdir, "/", id, "-",
+				format(Sys.time(), "%Y-%m-%d-%H%M"), ".png", sep="")
+			png(path, 800, 600)
+		}
+		maintitle <- paste("project ", id, " (", date(), ")\n", project$url[1], sep="")
 
 		if (nonlinfailed) {
 			# plot the linear fit
 			y <- predict(linearreg, data.frame(t=0:1))
 			sigma <- summary(linearreg)$sigma
-			plot(project$t, project$funds, pch=16, main=paste("project", id), xlim=0:1, ylim=range(y), xlab="normalised time", ylab="$")
+			plot(project$t, project$funds, pch=16, main=maintitle, xlim=0:1, ylim=range(y[is.finite(y)]), xlab="normalised time", ylab="$")
 			polygon(c(0, 1, 1, 0), c(y - 2*sigma, rev(y + 2*sigma)), col="#00006016")
 			abline(linearreg, col="red")
 		} else {
@@ -147,21 +154,30 @@ makeniceplots <- function(project, predfile="pred.txt", pngdir="pngs") {
 			x <- seq(0, 1, 0.002)
 			y <- predict(nonlinreg, data.frame(t=x))
 			sigma <- summary(nonlinreg)$sigma
-			plot(project$t, project$funds, pch=16, main=paste("project", id), xlim=0:1, ylim=range(y), xlab="normalised time", ylab="$")
+			plot(project$t, project$funds, pch=16, main=maintitle, xlim=0:1, ylim=range(y[is.finite(y)]), xlab="normalised time", ylab="$")
 			polygon(c(x, rev(x)), c(y - 2*sigma, rev(y + 2*sigma)), col="#00006016")
 			params <- nonlinreg$m$getPars()
 			curve(params[1] * x^params[2], add=T, col="red", n=501)
 		}
 
-		# close png file now plotting's done
-		dev.off()
+		if (pngdir != "") {
+			# close png file now plotting's done
+			dev.off()
+		} else {
+			# not writing any png files, so this is running interactively
+			if (length(project[,1]) > 10) {
+				Sys.sleep(1)
+			}
+		}
 
-		finalpred <- tail(y, 1) # predict final $
-		write.table(data.frame(project=id, samplesize=length(project[,1]), final=finalpred, err=sigma, fittype=chosenfit), predfile, append=T, row.names=F, col.names=F)
+		if (predfile != "") {
+			finalpred <- tail(y, 1) # predict final $
+			write.table(data.frame(project=id, samplesize=length(project[,1]), final=signif(finalpred, 4), err=signif(sigma, 3), fittype=chosenfit, url=project$url[1]), predfile, append=T, row.names=F, col.names=F)
+		}
 
 		cat(id, "") # so we know something's happening
 	}
+	cat("\n") # toss in a newline
 }
 
 makeniceplots() # assumes you made a pngs/ dir to put the png files in
-cat("\n") # toss in a newline
