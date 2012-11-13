@@ -14,7 +14,7 @@ for directory, subdirs, filenames in os.walk("projects/"):
 # now open each individual file and add it to a master data file R can read
 
 output = open("infos.txt", "wb")
-output.write("id\tstart\tnow\tt\tchumps\tgoal\tfunds\tf\n") # set better column names than R's default "V2" shit
+output.write("id\turl\tstart\tnow\tt\tchumps\tgoal\tfunds\tf\n") # set better column names than R's default "V2" shit
 
 empties = 0
 for i in xrange(len(projects)):
@@ -26,6 +26,7 @@ for i in xrange(len(projects)):
 		continue
 	summary = everything[0].split("\t")
 	data = everything[1:]
+	url = summary[2]
 	start = summary[3][:-6] # cut off useless timezone that's always +0000
 	goal = float(summary[5])
 	#print i, project, summary, goal
@@ -33,8 +34,9 @@ for i in xrange(len(projects)):
 		timestamp, normedtime, chumps, funds = point.strip().split("\t")
 		timestamp = timestamp[:-6] # cut off that useless timezone again
 		funds = float(funds)
-		output.write("%i\t%s\t%s\t%.6f\t%s\t%i\t%i\t%.6f\n" % (i+1, start, timestamp, float(normedtime), chumps, goal, funds, funds / goal))
+		output.write("%i\t\"%s\"\t%s\t%s\t%.6f\t%s\t%i\t%i\t%.6f\n" % (i+1, url, start, timestamp, float(normedtime), chumps, goal, funds, funds / goal))
 
 output.close()
 
-print empties, "projects have no individual data file yet btw"
+if empties:
+	print empties, "projects have no individual data file yet btw"
